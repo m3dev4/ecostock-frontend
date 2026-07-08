@@ -7,6 +7,7 @@ import Layout from "./layout";
 import Login from "./pages/Login";
 import Warehouse from "./pages/warehouse";
 import Product from "./pages/product";
+import DetailWarehouse from "./components/warehouse/detailWarehouse";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { path: "/", element: <App /> },
       { path: "/warehouse", element: <Warehouse /> },
       { path: "/products", element: <Product /> },
+      {path:"/warehouse/:id", element:<DetailWarehouse/>},
     ],
   },
   { path: "/login", element: <Login /> },

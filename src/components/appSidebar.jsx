@@ -78,7 +78,7 @@ const AppSidebar = () => {
                 <img
                   src={nav.icon}
                   alt={nav.name}
-                  className="h-6 w-6 shrink-0"
+                  className="h-4 w-4 shrink-0"
                 />
 
                 {!collapsed && <span className="font-medium">{nav.name}</span>}

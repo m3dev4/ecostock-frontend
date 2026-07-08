@@ -1,15 +1,28 @@
 /** @format */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuthStore } from './stores/auth.store';
 import { Navigate, Outlet } from 'react-router-dom';
 import { Button } from './components/ui/button';
-import { Warehouse } from 'lucide-react';
-import { Package } from 'lucide-react';
+import { Warehouse, Package, Loader2 } from 'lucide-react';
 import CardHead from './components/cardHead';
+import { useWarehouse } from './stores/warehouse.store';
 
 const App = () => {
   const { isAuthenticated, loading, refreshAccessToken } = useAuthStore();
+  const { warehouses, fetchAllWarehouses } = useWarehouse();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAllWarehouses();
+    }
+  }, [isAuthenticated, fetchAllWarehouses]);
+
+  const totalWarehouse = warehouses.length;
+  const largestWarehouses = warehouses.reduce(
+    (acc, val) => ((val.capacity || 0) > (acc?.capacity || 0) ? val : acc),
+    warehouses[0],
+  )?.capacity || 0;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -50,9 +63,9 @@ const App = () => {
 
       {/* Stats */}
       <div className="mt-8 grid gap-4 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-        <CardHead title="Entrepôts" />
+        <CardHead title="Entrepôts" quantity={totalWarehouse} />
         <CardHead title="Produits" />
-        <CardHead title="Plus grande capacité" />
+        <CardHead title="Plus grande capacité" capacity={largestWarehouses} />
         <CardHead title="Total de quantité" />
       </div>
     </div>
