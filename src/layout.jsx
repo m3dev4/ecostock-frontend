@@ -11,9 +11,11 @@ const Layout = () => {
     <SidebarProvider>
       <AppSidebar />
 
-      <SidebarInset className="bg-zinc-100">
-        <header className="flex items-center px-6">
-          <SidebarTrigger />
+      <SidebarInset className="bg-background">
+        <header className="flex items-center gap-3 px-6 py-3.5 border-b border-border bg-background">
+          <SidebarTrigger className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg" />
+          <div className="h-4 w-px bg-border" />
+          <span className="text-sm font-medium text-muted-foreground">EcoStock</span>
         </header>
         <main className="flex-1 p-6">
           <Outlet />

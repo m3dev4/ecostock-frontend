@@ -49,27 +49,21 @@ export function DrawerNested() {
         <Toaster />
       <DrawerTrigger
         render={
-          <Button className="gap-2 bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/20">
-            <Warehouse className="h-4 w-4 text-white" />
-            <span className="text-white">Ajouter un entrepôt</span>
+          <Button className="gap-2">
+            <Warehouse className="h-4 w-4" />
+            <span>Ajouter un entrepôt</span>
           </Button>
         }
       />
       <DrawerContent
-        className="
-      bg-slate-900/40
-        backdrop-blur-xl backdrop-saturate-150
-        border border-white/20
-        shadow-2xl shadow-black/10
-        rounded-t-2xl
-    "
+        className="bg-card border-border rounded-t-xl"
       >
-        <DrawerHeader className="border-b border-white/10 pb-4">
-          <DrawerTitle className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+        <DrawerHeader className="border-b border-border pb-4">
+          <DrawerTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
             <Warehouse className="h-5 w-5" />
             Ajouter un entrepôt
           </DrawerTitle>
-          <DrawerDescription className="text-slate-300 font-semibold">
+          <DrawerDescription className="text-muted-foreground">
             Remplissez les informations suivantes pour créer un nouvel entrepôt
           </DrawerDescription>
         </DrawerHeader>
@@ -78,7 +72,7 @@ export function DrawerNested() {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="name"
-              className="text-sm font-medium text-slate-700 dark:text-slate-200"
+              className="text-sm font-medium text-foreground"
             >
               Nom de l'entrepôt
             </label>
@@ -90,14 +84,13 @@ export function DrawerNested() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="bg-white backdrop-blur-sm border-white/30 focus-visible:ring-slate-900/30"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="location"
-              className="text-sm font-medium text-slate-700 dark:text-slate-200"
+              className="text-sm font-medium text-foreground"
             >
               Emplacement
             </label>
@@ -109,14 +102,13 @@ export function DrawerNested() {
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
               }
-              className="bg-white  backdrop-blur-sm border-white/30 focus-visible:ring-slate-900/30"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="capacity"
-              className="text-sm font-medium text-slate-700 dark:text-slate-200"
+              className="text-sm font-medium text-foreground"
             >
               Capacité (m³ / unités)
             </label>
@@ -128,13 +120,12 @@ export function DrawerNested() {
               onChange={(e) =>
                 setFormData({ ...formData, capacity: e.target.value })
               }
-              className="bg-white  backdrop-blur-sm border-white/30 focus-visible:ring-slate-900/30"
             />
           </div>
 
           <Button
             type="submit"
-            className="mt-2 bg-slate-900 hover:bg-slate-800 text-white shadow-md"
+            className="mt-2"
           >
             {loading ? <Loader2 className="animate-spin" /> : 'Créer l\'entrepôt'}
           </Button>

@@ -1,6 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Warehouse, MapPin, Boxes } from 'lucide-react';
+import { Warehouse, MapPin, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWarehouse } from '@/stores/warehouse.store';
 import { DrawerNested } from '@/components/warehouse/createWarehouse';
@@ -17,7 +16,7 @@ const Warehouses = () => {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center text-muted-foreground">
         Chargement...
       </div>
     );
@@ -25,7 +24,7 @@ const Warehouses = () => {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center text-red-500">
+      <div className="flex h-full items-center justify-center text-destructive">
         {error}
       </div>
     );
@@ -33,49 +32,56 @@ const Warehouses = () => {
 
   return (
     <div className="space-y-8">
-     
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Warehouses</h1>
-
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Warehouses
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Gérez tous vos entrepôts.
           </p>
         </div>
 
-         <DrawerNested />
+        <DrawerNested />
       </div>
 
       {/* Grid */}
       {warehouses.length === 0 ? (
-        <div className="rounded-2xl border border-dashed py-16 text-center text-slate-500">
+        <div className="rounded-xl border border-dashed border-border py-16 text-center text-muted-foreground">
           Aucun entrepôt disponible.
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {warehouses.map((warehouse) => (
             <Link key={warehouse.id} to={`/warehouse/${warehouse.id}`}>
-              <Card className="border border-slate-200 shadow-none hover:border-cyan-500 transition-colors">
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100">
-                      <Warehouse className="h-5 w-5 text-slate-700" />
+              <Card className="border border-border transition-colors hover:border-primary/40">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Warehouse className="h-5 w-5 text-primary" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground truncate">
+                          {warehouse.name}
+                        </h3>
+                        <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{warehouse.location}</span>
+                        </p>
+                      </div>
                     </div>
 
-                    <div>
-                      <h3 className="font-semibold">{warehouse.name}</h3>
-
-                      <p className="text-sm text-slate-500">
-                        {warehouse.location}
-                      </p>
-                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-lg font-bold">{warehouse.capacity}</p>
-
-                    <p className="text-xs text-slate-500">unités</p>
+                  <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                    <span className="text-xs text-muted-foreground">Capacité</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {warehouse.capacity} unités
+                    </span>
                   </div>
                 </CardContent>
               </Card>

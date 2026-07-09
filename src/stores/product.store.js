@@ -10,160 +10,170 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export const useProductStore = create(
-  persist((set) => ({
-    products: [],
-    product: null,
-    loading: false,
-    error: null,
+  persist(
+    (set) => ({
+      products: [],
+      product: null,
+      loading: false,
+      error: null,
 
-    //action
+      //action
 
-    fetchAllProducts: async () => {
-      set({
-        loading: true,
-        error: null,
-      });
-      try {
-        const response = await getAllProducts();
-        if (response.status) {
+      fetchAllProducts: async () => {
+        set({
+          loading: true,
+          error: null,
+        });
+        try {
+          const response = await getAllProducts();
+          if (response.status) {
+            set({
+              products: response.data,
+              loading: false,
+              error: null,
+            });
+          }
+          return response;
+        } catch (error) {
           set({
-            products: response.data,
             loading: false,
-            error: null,
+            error: error.response?.data?.detail || 'Failed to fetch products',
           });
         }
-        return response;
-      } catch (error) {
-        set({
-          loading: false,
-          error: error.response?.data?.detail || 'Failed to fetch products',
-        });
-      }
-    },
+      },
 
-    fetchProduct: async (id) => {
-      set({
-        loading: true,
-        error: null,
-      });
-      try {
-        const response = await getProduct(id);
-        if (response.data) {
+      fetchProduct: async (id) => {
+        set({
+          loading: true,
+          error: null,
+        });
+        try {
+          const response = await getProduct(id);
+          if (response.data) {
+            set({
+              product: response.data,
+              loading: false,
+              error: null,
+            });
+          }
+          return response;
+        } catch (error) {
           set({
-            product: response.data,
             loading: false,
-            error: null,
+            error: error.response?.data?.detail || 'Failed to fetch product',
           });
+          return false;
         }
-        return response;
-      } catch (error) {
+      },
+
+      productCreate: async (data) => {
         set({
-          loading: false,
-          error: error.response?.data?.detail || 'Failed to fetch product',
+          loading: true,
+          error: null,
         });
-        return false;
-      }
-    },
-
-    productCreate: async (data) => {
-      set({
-        loading: true,
-        error: null,
-      });
-      try {
-        const response = await createProduct(data);
-        if (response.data) {
+        try {
+          const response = await createProduct(data);
+          if (response.data) {
+            set((state) => ({
+              products: [...state.products, response.data],
+              loading: false,
+              error: null,
+            }));
+          }
+          return response;
+        } catch (error) {
           set((state) => ({
-            products: [...state.products, response.data],
             loading: false,
-            error: null,
+            error: error.response?.data?.detail || 'Failed to create product',
           }));
+          return false;
         }
-        return response;
-      } catch (error) {
-        set((state) => ({
-          loading: false,
-          error: error.response?.data?.detail || 'Failed to create product',
-        }));
-        return false;
-      }
-    },
+      },
 
-    productUpdate: async (id, data) => {
-      set({
-        lodaing: true,
-        error: null,
-      });
-      try {
-        const response = await updateProduct(id, data);
-        if (response.status) {
-          set((state) => ({
-            products: state.product.map((p) =>
-              p.id === id ? response.data : p,
-            ),
-            loading: false,
-            error: null,
-          }));
-        }
-      } catch (error) {
+      productUpdate: async (id, data) => {
         set({
-          lodaing: false,
-          error: error.response?.data?.detail || 'Failed to update product',
+          lodaing: true,
+          error: null,
         });
-        return false;
-      }
-    },
-
-    productDelete: async (id) => {
-      set({
-        loading: true,
-        error: null,
-      });
-
-      try {
-        const response = await deleteProduct(id);
-        if (response.status) {
-          set((state) => ({
-            products: products.filter((p) => p.id !== id),
-            loading: false,
-            error: null,
-          }));
+        try {
+          const response = await updateProduct(id, data);
+          if (response.status) {
+            set((state) => ({
+              products: state.product.map((p) =>
+                p.id === id ? response.data : p,
+              ),
+              loading: false,
+              error: null,
+            }));
+          }
+        } catch (error) {
+          set({
+            lodaing: false,
+            error: error.response?.data?.detail || 'Failed to update product',
+          });
+          return false;
         }
-        return response;
-      } catch (error) {
+      },
+
+      productDelete: async (id) => {
         set({
-          loading: false,
-          error: error.response?.data?.detail || 'Failed to delete product',
+          loading: true,
+          error: null,
         });
-        return false;
-      }
-    },
 
-    productMove: async (id, data) => {
-      set({
-        loading: true,
-        error: null,
-      });
-
-      try {
-        const response = await moveProduct(id, data);
-        if (response.status) {
-          set((state) => ({
-            products: state.products.map((p) =>
-              p.id === id ? response.data : p,
-            ),
+        try {
+          const response = await deleteProduct(id);
+          if (response.status) {
+            set((state) => ({
+              products: products.filter((p) => p.id !== id),
+              loading: false,
+              error: null,
+            }));
+          }
+          return response;
+        } catch (error) {
+          set({
             loading: false,
-            error: null,
-          }));
+            error: error.response?.data?.detail || 'Failed to delete product',
+          });
+          return false;
         }
-        return response;
-      } catch (error) {
+      },
+
+      productMove: async (id, data) => {
         set({
-          loading: false,
-          error: error.response?.data?.detail || 'Failed to move product',
+          loading: true,
+          error: null,
         });
-        return false;
-      }
+
+        try {
+          const response = await moveProduct(id, data);
+          if (response.status) {
+            set((state) => ({
+              products: state.products.map((p) =>
+                p.id === id ? response.data : p,
+              ),
+              loading: false,
+              error: null,
+            }));
+          }
+          return response;
+        } catch (error) {
+          set({
+            loading: false,
+            error: error.response?.data?.detail || 'Failed to move product',
+          });
+          return false;
+        }
+      },
+    }),
+    {
+      name: 'products',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        products: state.products,
+        product: state.product,
+      }),
     },
-  })),
+  ),
 );

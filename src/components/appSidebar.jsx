@@ -11,14 +11,13 @@ import { NavLinks } from "@/constants/navLinks";
 const AppSidebar = () => {
   const location = useLocation();
   const { state } = useSidebar();
-
   const collapsed = state === "collapsed";
 
   return (
     <Sidebar
       collapsible="icon"
       variant="sidebar"
-      className="m-3 h-[calc(100vh-24px)] rounded-3xl border-0 bg-[#2D2D2D] text-white shadow-2xl"
+      className="m-3 h-[calc(100vh-24px)] rounded-2xl border border-border bg-card text-foreground"
     >
       {/* HEADER */}
       <SidebarHeader
@@ -26,35 +25,26 @@ const AppSidebar = () => {
       >
         <Link
           to="/"
-          className={`flex items-center ${
-            collapsed ? "justify-center" : "gap-3"
-          }`}
+          className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-400">
-            <span className="font-bold text-slate-900">EC</span>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary">
+            <span className="font-bold text-primary-foreground">EC</span>
           </div>
 
           {!collapsed && (
             <div>
-              <h1 className="text-lg font-semibold tracking-tight">EcoStock</h1>
-              <p className="text-xs text-gray-400">Inventory Manager</p>
+              <h1 className="text-base font-semibold tracking-tight text-foreground">
+                EcoStock
+              </h1>
+              <p className="text-xs text-muted-foreground">Inventory Manager</p>
             </div>
           )}
         </Link>
       </SidebarHeader>
 
-      {/* SEARCH */}
-      {!collapsed && (
-        <div className="px-5">
-          <div className="rounded-xl bg-[#383838] px-4 py-3 text-sm text-gray-500">
-            Search...
-          </div>
-        </div>
-      )}
-
       {/* MENU */}
-      <SidebarContent className={`mt-6 ${collapsed ? "px-2" : "px-4"}`}>
-        <div className="space-y-2">
+      <SidebarContent className={`mt-4 ${collapsed ? "px-2" : "px-3"}`}>
+        <div className="space-y-1">
           {NavLinks.map((nav) => {
             const active = location.pathname === nav.path;
 
@@ -64,24 +54,22 @@ const AppSidebar = () => {
                 to={nav.path}
                 title={collapsed ? nav.name : ""}
                 className={`
-                  flex items-center rounded-xl py-3 transition-all duration-200
-
-                  ${collapsed ? "justify-center px-0" : "gap-3 px-4"}
-
+                  flex items-center rounded-lg py-2.5 transition-colors duration-150
+                  ${collapsed ? "justify-center px-0" : "gap-3 px-3"}
                   ${
                     active
-                      ? "bg-[#3B3B3B] text-white"
-                      : "text-gray-400 hover:bg-[#373737] hover:text-white"
+                      ? "bg-accent text-accent-foreground font-medium"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }
                 `}
               >
                 <img
                   src={nav.icon}
                   alt={nav.name}
-                  className="h-4 w-4 shrink-0"
+                  className={`h-4 w-4 shrink-0 ${active ? "opacity-100" : "opacity-50"}`}
                 />
 
-                {!collapsed && <span className="font-medium">{nav.name}</span>}
+                {!collapsed && <span className="text-sm">{nav.name}</span>}
               </Link>
             );
           })}
@@ -89,24 +77,18 @@ const AppSidebar = () => {
       </SidebarContent>
 
       {/* FOOTER */}
-      <SidebarFooter className="p-4">
-        <div className="rounded-2xl bg-[#383838] p-3">
-          <div
-            className={`flex items-center ${
-              collapsed ? "justify-center" : "gap-3"
-            }`}
-          >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-400 font-bold text-slate-900">
-              M
-            </div>
-
-            {!collapsed && (
-              <div className="flex-1">
-                <p className="text-sm font-medium">Mouhamed</p>
-                <p className="text-xs text-gray-400">Administrator</p>
-              </div>
-            )}
+      <SidebarFooter className="p-3">
+        <div className={`flex items-center rounded-lg border border-border p-2.5 ${collapsed ? "justify-center" : "gap-3"}`}>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+            M
           </div>
+
+          {!collapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">Mouhamed</p>
+              <p className="text-xs text-muted-foreground truncate">Administrator</p>
+            </div>
+          )}
         </div>
       </SidebarFooter>
     </Sidebar>

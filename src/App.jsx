@@ -1,28 +1,36 @@
-/** @format */
-
 import React, { useEffect } from 'react';
 import { useAuthStore } from './stores/auth.store';
-import { Navigate, Outlet } from 'react-router-dom';
-import { Button } from './components/ui/button';
-import { Warehouse, Package, Loader2 } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
+import { Loader2, Building2, Package, Boxes, TrendingUp } from 'lucide-react';
 import CardHead from './components/cardHead';
 import { useWarehouse } from './stores/warehouse.store';
+import { useProductStore } from './stores/product.store';
+import { DrawerNested } from './components/warehouse/createWarehouse';
+import { CreateProduct } from './components/createProduct';
 
 const App = () => {
-  const { isAuthenticated, loading, refreshAccessToken } = useAuthStore();
+  const { isAuthenticated, loading } = useAuthStore();
   const { warehouses, fetchAllWarehouses } = useWarehouse();
+  const { products, fetchAllProducts } = useProductStore();
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchAllWarehouses();
+      fetchAllProducts();
     }
-  }, [isAuthenticated, fetchAllWarehouses]);
+  }, [isAuthenticated, fetchAllWarehouses, fetchAllProducts]);
 
   const totalWarehouse = warehouses.length;
-  const largestWarehouses = warehouses.reduce(
-    (acc, val) => ((val.capacity || 0) > (acc?.capacity || 0) ? val : acc),
-    warehouses[0],
-  )?.capacity || 0;
+  const totalProducts = products.length;
+
+  const largestWarehouses =
+    warehouses.reduce(
+      (acc, val) => ((val.capacity || 0) > (acc?.capacity || 0) ? val : acc),
+      warehouses[0],
+    )?.capacity || 0;
+
+  const totalQuantity =
+    products.reduce((acc, val) => acc + (val.quantity || 0), 0);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -31,42 +39,44 @@ const App = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 size={20} className="animate-spin" />
+        <Loader2 size={20} className="animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh p-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Bienvenue sur votre tableau de bord.
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Vue d'ensemble de votre inventaire.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Button className="gap-2 bg-slate-900 hover:bg-slate-800 text-white">
-            <Warehouse className="h-4 w-4" />
-            Ajouter un entrepôt
-          </Button>
-
-          <Button className="gap-2 bg-cyan-600 hover:bg-cyan-700 text-white">
-            <Package className="h-4 w-4" />
-            Ajouter un produit
-          </Button>
+        <div className="flex flex-wrap gap-2">
+          <DrawerNested />
+          <CreateProduct />
         </div>
       </div>
 
       {/* Stats */}
-      <div className="mt-8 grid gap-4 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-        <CardHead title="Entrepôts" quantity={totalWarehouse} />
-        <CardHead title="Produits" />
-        <CardHead title="Plus grande capacité" capacity={largestWarehouses} />
-        <CardHead title="Total de quantité" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <CardHead title="Entrepôts" quantity={totalWarehouse} icon={Building2} />
+        <CardHead title="Produits" quantity={totalProducts} icon={Package} />
+        <CardHead
+          title="Plus grande capacité"
+          capacity={largestWarehouses}
+          icon={TrendingUp}
+        />
+        <CardHead
+          title="Total de quantité"
+          quantity={totalQuantity}
+          icon={Boxes}
+        />
       </div>
     </div>
   );

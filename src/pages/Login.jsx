@@ -29,10 +29,10 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Section */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-cyan-900 via-slate-900 to-black text-white p-16">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-emerald-900 via-green-950 to-emerald-950 text-white p-16">
         <div className="max-w-lg flex flex-col justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-cyan-500 flex items-center justify-center font-bold text-xl">
+            <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center font-bold text-xl text-primary-foreground">
               E
             </div>
 
@@ -40,7 +40,7 @@ const Login = () => {
           </div>
 
           <div className="space-y-6">
-            <span className="text-cyan-400 uppercase tracking-widest text-sm">
+            <span className="text-emerald-400 uppercase tracking-widest text-sm">
               Warehouse Management
             </span>
 
@@ -48,25 +48,25 @@ const Login = () => {
               Manage your inventory with confidence.
             </h2>
 
-            <p className="text-slate-300 text-lg leading-8">
+            <p className="text-emerald-100/70 text-lg leading-8">
               Track warehouses, monitor stock levels, manage products and keep
               your entire inventory synchronized in one place.
             </p>
           </div>
 
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-emerald-100/40">
             © 2026 EcoStock. All rights reserved.
           </div>
         </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex flex-1 items-center justify-center bg-slate-50 px-6 py-10">
-        <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border p-8">
+      <div className="flex flex-1 items-center justify-center bg-background px-6 py-10">
+        <div className="w-full max-w-md rounded-xl border border-border bg-card p-8">
           {/* Mobile Logo */}
           <div className="flex lg:hidden justify-center mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-cyan-700"></div>
+              <div className="w-10 h-10 rounded-lg bg-primary"></div>
               <span className="text-2xl font-bold">EcoStock</span>
             </div>
           </div>
@@ -123,7 +123,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-cyan-700 hover:bg-cyan-800"
+              className="w-full h-10"
             >
               {loading ? (
                 <Loader2 size={20} className="animate-spin" />

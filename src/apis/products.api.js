@@ -13,13 +13,13 @@ export const createProduct = async (productData) => {
 };
 
 export const updateProduct = async (id, productData) => {
-  return instance.patch(`product/${id}/`, productData);
+  return instance.patch(`products/${id}/`, productData);
 };
 
 export const deleteProduct = async (id) => {
-  return instance.delete(`product/${id}/`);
+  return instance.delete(`products/${id}/`);
 };
 
 export const moveProduct = async (id, data) => {
-  return instance.post(`product/${id}/move/`, data)
+  return instance.post(`products/${id}/move/`, data)
 }
