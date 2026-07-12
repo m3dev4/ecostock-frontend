@@ -3,10 +3,19 @@ import { useParams, Link } from 'react-router-dom';
 import { useWarehouse } from '@/stores/warehouse.store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Warehouse, MapPin, Boxes, ClipboardCheck, ArrowLeft, Hash } from 'lucide-react';
+import {
+  Warehouse,
+  MapPin,
+  Boxes,
+  ClipboardCheck,
+  ArrowLeft,
+  Hash,
+} from 'lucide-react';
+import { useAuthStore } from '@/stores/auth.store';
 
 const DetailWarehouse = () => {
   const { id } = useParams();
+  const { isAuthenticated } = useAuthStore();
 
   const { warehouse, loading, error, fetchWarehouse, warehouseAudit } =
     useWarehouse();
@@ -76,11 +85,12 @@ const DetailWarehouse = () => {
             </p>
           </div>
         </div>
-
-        <Button onClick={handleAudit} className="gap-2">
-          <ClipboardCheck className="h-4 w-4" />
-          Lancer un audit
-        </Button>
+        {isAuthenticated ? (
+          <Button onClick={handleAudit} className="gap-2">
+            <ClipboardCheck className="h-4 w-4" />
+            Lancer un audit
+          </Button>
+        ) : null}
       </div>
 
       {/* Info card */}
@@ -141,7 +151,9 @@ const DetailWarehouse = () => {
                 </p>
               </div>
               <div className="rounded-lg border border-border p-4">
-                <p className="text-xs text-muted-foreground">Nombre total de produits</p>
+                <p className="text-xs text-muted-foreground">
+                  Nombre total de produits
+                </p>
                 <p className="mt-1 text-sm font-medium text-foreground">
                   {audit.total_products}
                 </p>

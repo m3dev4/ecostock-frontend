@@ -2,22 +2,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/auth.store";
 import { Loader2 } from "lucide-react";
-import React from "react";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {useNavigate} from "react-router-dom"
+import { loginSchema } from "@/validations/form.validate";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Login = () => {
   const { login, loading, error } = useAuthStore();
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+  const {register, handleSubmit, formState: {errors}} = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    }
+  })
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (data) => {
     try {
-      const success = await login(formData);
+      const success = await login(data);
       if (success) {
         navigate("/")
       }
@@ -79,7 +82,7 @@ const Login = () => {
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit(handleLogin)} className="mt-8 space-y-5">
             <div className="space-y-2">
               <label htmlFor="username" className="text-sm font-medium">
                 Username
@@ -89,14 +92,9 @@ const Login = () => {
                 id="username"
                 type="text"
                 placeholder="Enter your username"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    username: e.target.value,
-                  })
-                }
+                {...register("username")}
               />
+              {errors.username && <span className="text-red-500">{errors.username.message}</span>}
             </div>
 
             <div className="space-y-2">
@@ -108,14 +106,9 @@ const Login = () => {
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    password: e.target.value,
-                  })
-                }
+                {...register("password")}
               />
+              {errors.password && <span className="text-red-500">{errors.password.message}</span>}
             </div>
 
             {error && <p className="text-sm text-destructive">{error}</p>}

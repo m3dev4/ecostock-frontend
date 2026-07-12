@@ -92,23 +92,24 @@ export const useProductStore = create(
 
       productUpdate: async (id, data) => {
         set({
-          lodaing: true,
+          loading: true,
           error: null,
         });
         try {
           const response = await updateProduct(id, data);
           if (response.status) {
             set((state) => ({
-              products: state.product.map((p) =>
+              products: state.products.map((p) =>
                 p.id === id ? response.data : p,
               ),
               loading: false,
               error: null,
             }));
           }
+          return response;
         } catch (error) {
           set({
-            lodaing: false,
+            loading: false,
             error: error.response?.data?.detail || 'Failed to update product',
           });
           return false;

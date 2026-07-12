@@ -4,15 +4,11 @@ import { Link } from 'react-router-dom';
 import { useWarehouse } from '@/stores/warehouse.store';
 import { DrawerNested } from '@/components/warehouse/createWarehouse';
 import { useAuthStore } from '@/stores/auth.store';
-import { Navigate } from 'react-router-dom';
+
 
 const Warehouses = () => {
   const { warehouses, loading, error } = useWarehouse();
   const { isAuthenticated } = useAuthStore();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
 
   if (loading) {
     return (
@@ -43,7 +39,7 @@ const Warehouses = () => {
           </p>
         </div>
 
-        <DrawerNested />
+        {isAuthenticated ? <DrawerNested /> : null}
       </div>
 
       {/* Grid */}
@@ -78,7 +74,9 @@ const Warehouses = () => {
                   </div>
 
                   <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                    <span className="text-xs text-muted-foreground">Capacité</span>
+                    <span className="text-xs text-muted-foreground">
+                      Capacité
+                    </span>
                     <span className="text-sm font-semibold text-foreground">
                       {warehouse.capacity} unités
                     </span>

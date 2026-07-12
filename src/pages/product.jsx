@@ -1,15 +1,20 @@
 import { CreateProduct } from '@/components/createProduct';
+import UpdateProductModal from '@/components/product/UpdateProductModal';
 import { Toaster } from '@/components/ui/sonner';
+import { useAuthStore } from '@/stores/auth.store';
 import { useProductStore } from '@/stores/product.store';
 import { useWarehouse } from '@/stores/warehouse.store';
 import { Eye, Trash2, Pencil } from 'lucide-react';
+import { useState } from 'react';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const Product = () => {
-  const { products, fetchAllProducts, productDelete } = useProductStore();
+  const { products, fetchAllProducts, productDelete, productUpdate } =
+    useProductStore();
   const { fetchAllWarehouses } = useWarehouse();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     fetchAllProducts();
@@ -53,7 +58,7 @@ const Product = () => {
           </p>
         </div>
 
-        <CreateProduct />
+        {isAuthenticated ? <CreateProduct /> : null}
       </div>
 
       {/* Table */}
@@ -61,18 +66,33 @@ const Product = () => {
         <table className="min-w-full divide-y divide-border">
           <thead className="bg-muted/50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Nom</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Quantité</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Date d'expiration</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Entrepôt</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Statut</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                Nom
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                Quantité
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                Date d'expiration
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                Entrepôt
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
+                Statut
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                Actions
+              </th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-border bg-card">
             {products.map((product) => (
-              <tr key={product.id} className="transition-colors hover:bg-muted/30">
+              <tr
+                key={product.id}
+                className="transition-colors hover:bg-muted/30"
+              >
                 <td className="px-4 py-3 text-sm font-medium text-foreground">
                   {product.name}
                 </td>
@@ -102,19 +122,19 @@ const Product = () => {
                     >
                       <Eye size={16} />
                     </Link>
-                    <button
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      type="button"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                      onClick={() => handleDeleteProduct(product.id)}
-                      type="button"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {isAuthenticated ? (
+                      <>
+                        <UpdateProductModal product={product} />
+
+                        <button
+                          className="text-muted-foreground hover:text-destructive transition-colors"
+                          onClick={() => handleDeleteProduct(product.id)}
+                          type="button"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    ) : null}
                   </div>
                 </td>
               </tr>

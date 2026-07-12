@@ -29,12 +29,10 @@ const App = () => {
       warehouses[0],
     )?.capacity || 0;
 
-  const totalQuantity =
-    products.reduce((acc, val) => acc + (val.quantity || 0), 0);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  const totalQuantity = products.reduce(
+    (acc, val) => acc + (val.quantity || 0),
+    0,
+  );
 
   if (loading) {
     return (
@@ -57,15 +55,21 @@ const App = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <DrawerNested />
-          <CreateProduct />
-        </div>
+        {isAuthenticated ? (
+          <div className="flex flex-wrap gap-2">
+            <DrawerNested />
+            <CreateProduct />
+          </div>
+        ) : null}
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <CardHead title="Entrepôts" quantity={totalWarehouse} icon={Building2} />
+        <CardHead
+          title="Entrepôts"
+          quantity={totalWarehouse}
+          icon={Building2}
+        />
         <CardHead title="Produits" quantity={totalProducts} icon={Package} />
         <CardHead
           title="Plus grande capacité"

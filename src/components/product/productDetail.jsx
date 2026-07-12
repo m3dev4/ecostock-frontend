@@ -14,6 +14,7 @@ import {
   Boxes,
   ArrowLeft,
 } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth.store';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -21,6 +22,7 @@ const ProductDetail = () => {
   const { product, fetchProduct, productMove, loading } = useProductStore();
 
   const { warehouses, fetchAllWarehouses } = useWarehouse();
+  const { isAuthenticated } = useAuthStore();
 
   const [formData, setFormData] = useState({
     warehouse: '',
@@ -41,7 +43,6 @@ const ProductDetail = () => {
 
   const handleMove = async (e) => {
     e.preventDefault();
-
     if (!formData.warehouse) {
       toast.error('Veuillez sélectionner un entrepôt');
       return;
@@ -95,8 +96,16 @@ const ProductDetail = () => {
 
   const infoItems = [
     { icon: Boxes, label: 'Quantité', value: product.quantity },
-    { icon: CalendarDays, label: 'Date d\'expiration', value: product.expiration_date },
-    { icon: Warehouse, label: 'Entrepôt actuel', value: product.warehouse_name },
+    {
+      icon: CalendarDays,
+      label: "Date d'expiration",
+      value: product.expiration_date,
+    },
+    {
+      icon: Warehouse,
+      label: 'Entrepôt actuel',
+      value: product.warehouse_name,
+    },
   ];
 
   return (
@@ -142,8 +151,7 @@ const ProductDetail = () => {
                   className={`mt-1 inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium capitalize ${getStatusBadge(
                     product.status,
                   )}`}
-                >
-                  {product.status}
+                >       
                 </span>
               </div>
             </div>
@@ -155,7 +163,9 @@ const ProductDetail = () => {
                     <item.icon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.label}
+                    </p>
                     <p className="text-sm font-medium text-foreground">
                       {item.value}
                     </p>
@@ -167,48 +177,57 @@ const ProductDetail = () => {
         </Card>
 
         {/* Move product */}
-        <Card className="border border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-border">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <ArrowRightLeft className="h-5 w-5 text-primary" />
+        {isAuthenticated ? (
+          <Card className="border border-border">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-border">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <ArrowRightLeft className="h-5 w-5 text-primary" />
+                </div>
+                <h2 className="text-base font-semibold text-foreground">
+                  Déplacer
+                </h2>
               </div>
-              <h2 className="text-base font-semibold text-foreground">
-                Déplacer
-              </h2>
-            </div>
 
-            <form onSubmit={handleMove} className="mt-4 space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground">
-                  Nouvel entrepôt
-                </label>
-                <select
-                  value={formData.warehouse}
-                  onChange={(e) =>
-                    setFormData({
-                      warehouse: e.target.value,
-                    })
+              <form onSubmit={handleMove} className="mt-4 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground">
+                    Nouvel entrepôt
+                  </label>
+                  <select
+                    value={formData.warehouse}
+                    onChange={(e) =>
+                      setFormData({
+                        warehouse: e.target.value,
+                      })
+                    }
+                    className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+                  >
+                    <option value="">Sélectionner un entrepôt</option>
+                    {warehouses
+                      ?.filter((w) => w.id !== product.warehouse)
+                      .map((w) => (
+                        <option key={w.id} value={w.id}>
+                          {w.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    product.expiration_date <
+                    new Date().toISOString().split('T')[0]
                   }
-                  className="mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
                 >
-                  <option value="">Sélectionner un entrepôt</option>
-                  {warehouses
-                    ?.filter((w) => w.id !== product.warehouse)
-                    .map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <Button type="submit" className="w-full">
-                Déplacer le produit
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                  Déplacer le produit
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </div>
   );
