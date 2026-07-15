@@ -19,6 +19,7 @@ import { Input } from '../ui/input';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '../ui/sonner';
+import { getErrorMessage } from '@/utils/errors';
 
 export function DrawerNested() {
   const isMobile = useIsMobile();
@@ -39,6 +40,7 @@ export function DrawerNested() {
       }
     } catch (error) {
       console.log(error);
+      toast.error(getErrorMessage(error, "Erreur lors de la création de l'entrepôt"));
     }
   };
 

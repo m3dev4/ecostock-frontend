@@ -3,6 +3,7 @@ import { useWarehouse } from '@/stores/warehouse.store';
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/errors';
 import { Toaster } from '../ui/sonner';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
@@ -64,7 +65,7 @@ const ProductDetail = () => {
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || 'Erreur lors du déplacement',
+        getErrorMessage(error, 'Erreur lors du déplacement'),
       );
     }
   };

@@ -4,14 +4,17 @@ import {
   SidebarFooter,
   SidebarHeader,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
-import { NavLinks } from "@/constants/navLinks";
+} from '@/components/ui/sidebar';
+import { Link, useLocation } from 'react-router-dom';
+import { NavLinks } from '@/constants/navLinks';
+import { useAuthStore } from '@/stores/auth.store';
+import { Button } from './ui/button';
 
 const AppSidebar = () => {
   const location = useLocation();
   const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const collapsed = state === 'collapsed';
+  const { isAuthenticated } = useAuthStore();
 
   return (
     <Sidebar
@@ -21,11 +24,11 @@ const AppSidebar = () => {
     >
       {/* HEADER */}
       <SidebarHeader
-        className={`pt-7 pb-6 ${collapsed ? "px-0 flex items-center" : "px-6"}`}
+        className={`pt-7 pb-6 ${collapsed ? 'px-0 flex items-center' : 'px-6'}`}
       >
         <Link
           to="/"
-          className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}
+          className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary">
             <span className="font-bold text-primary-foreground">EC</span>
@@ -43,7 +46,7 @@ const AppSidebar = () => {
       </SidebarHeader>
 
       {/* MENU */}
-      <SidebarContent className={`mt-4 ${collapsed ? "px-2" : "px-3"}`}>
+      <SidebarContent className={`mt-4 ${collapsed ? 'px-2' : 'px-3'}`}>
         <div className="space-y-1">
           {NavLinks.map((nav) => {
             const active = location.pathname === nav.path;
@@ -52,21 +55,21 @@ const AppSidebar = () => {
               <Link
                 key={nav.id}
                 to={nav.path}
-                title={collapsed ? nav.name : ""}
+                title={collapsed ? nav.name : ''}
                 className={`
                   flex items-center rounded-lg py-2.5 transition-colors duration-150
-                  ${collapsed ? "justify-center px-0" : "gap-3 px-3"}
+                  ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'}
                   ${
                     active
-                      ? "bg-accent text-accent-foreground font-medium"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? 'bg-accent text-accent-foreground font-medium'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }
                 `}
               >
                 <img
                   src={nav.icon}
                   alt={nav.name}
-                  className={`h-4 w-4 shrink-0 ${active ? "opacity-100" : "opacity-50"}`}
+                  className={`h-4 w-4 shrink-0 ${active ? 'opacity-100' : 'opacity-50'}`}
                 />
 
                 {!collapsed && <span className="text-sm">{nav.name}</span>}
@@ -78,18 +81,49 @@ const AppSidebar = () => {
 
       {/* FOOTER */}
       <SidebarFooter className="p-3">
-        <div className={`flex items-center rounded-lg border border-border p-2.5 ${collapsed ? "justify-center" : "gap-3"}`}>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-            M
-          </div>
-
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">Mouhamed</p>
-              <p className="text-xs text-muted-foreground truncate">Administrator</p>
+        {isAuthenticated ? (
+          <div
+            className={`flex items-center rounded-lg border border-border p-2.5 ${collapsed ? 'justify-center' : 'gap-3'}`}
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              AD
             </div>
-          )}
-        </div>
+
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  Admin
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  Administrator
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link to="/login" className="w-full">
+            <Button>
+              {collapsed ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 8v4l3 3" />
+                  <path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0z" />
+                </svg>
+              ) : (
+                'Se connecter'
+              )}
+            </Button>
+          </Link>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

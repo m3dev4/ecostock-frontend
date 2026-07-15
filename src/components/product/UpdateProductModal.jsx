@@ -14,6 +14,16 @@ import {
 import { Pencil, Loader2 } from 'lucide-react';
 import { useProductStore } from '@/stores/product.store';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/errors';
+
+const isPastDate = (dateStr) => {
+  if (!dateStr) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkDate = new Date(dateStr);
+  checkDate.setHours(0, 0, 0, 0);
+  return checkDate < today;
+};
 
 const SNAP_POINTS = ['31rem', 1];
 
@@ -68,7 +78,7 @@ const UpdateProductModal = ({ product }) => {
       }
     } catch (error) {
       setLoading(false);
-      toast.error('Erreur lors de la modification');
+      toast.error(getErrorMessage(error, 'Erreur lors de la modification'));
     }
   };
 
@@ -125,9 +135,23 @@ const UpdateProductModal = ({ product }) => {
             <Input
               type="date"
               value={formData.expiration_date}
-              onChange={(e) =>
-                setFormData({ ...formData, expiration_date: e.target.value })
-              }
+              onChange={(e) => {
+                const newDate = e.target.value;
+                const expired = isPastDate(newDate);
+                setFormData((prev) => {
+                  let newStatus = prev.status;
+                  if (expired) {
+                    newStatus = 'perime';
+                  } else if (prev.status === 'perime') {
+                    newStatus = '';
+                  }
+                  return {
+                    ...prev,
+                    expiration_date: newDate,
+                    status: newStatus,
+                  };
+                });
+              }}
             />
           </div>
 
@@ -140,9 +164,10 @@ const UpdateProductModal = ({ product }) => {
               }
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none"
             >
-              <option value="disponible">Disponible</option>
-              <option value="reserve">Réservé</option>
-              <option value="perime">Périmé</option>
+              <option value="">Sélectionner un statut</option>
+              <option value="disponible" disabled={isPastDate(formData.expiration_date)}>Disponible</option>
+              <option value="reserve" disabled={isPastDate(formData.expiration_date)}>Réservé</option>
+              <option value="perime" disabled={!isPastDate(formData.expiration_date)}>Périmé</option>
             </select>
           </div>
 

@@ -9,9 +9,10 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/errors';
 
 const Product = () => {
-  const { products, fetchAllProducts, productDelete, productUpdate } =
+  const { products, fetchAllProducts, productDelete } =
     useProductStore();
   const { fetchAllWarehouses } = useWarehouse();
   const { isAuthenticated } = useAuthStore();
@@ -30,7 +31,7 @@ const Product = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error('Erreur lors de la suppression');
+      toast.error(getErrorMessage(error, 'Erreur lors de la suppression'));
     }
   };
 

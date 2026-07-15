@@ -129,39 +129,89 @@ const DetailWarehouse = () => {
       </Card>
 
       {/* Audit result */}
-      {audit && (
-        <Card className="border border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 pb-4 border-b border-border">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <ClipboardCheck className="h-5 w-5 text-primary" />
+      {audit && (() => {
+        const products = Array.isArray(audit.products) ? audit.products : [];
+        const warehouseName = audit.warehouse ?? '';
+        return (
+          <Card className="border border-border">
+            <CardContent className="p-6">
+              {/* Audit header */}
+              <div className="flex items-center gap-3 pb-4 border-b border-border">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <ClipboardCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">
+                    Résultat de l'audit{warehouseName ? ` — ${warehouseName}` : ''}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {products.length} produit{products.length !== 1 ? 's' : ''} trouvé{products.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-base font-semibold text-foreground">
-                  Résultat de l'audit
-                </h2>
-              </div>
-            </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-border p-4">
-                <p className="text-xs text-muted-foreground">Entrepôt</p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {audit.warehouse}
-                </p>
-              </div>
-              <div className="rounded-lg border border-border p-4">
-                <p className="text-xs text-muted-foreground">
-                  Nombre total de produits
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">
-                  {audit.total_products}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              {/* Products table */}
+              {products.length === 0 ? (
+                <div className="mt-6 flex flex-col items-center justify-center gap-2 py-10 text-center text-muted-foreground rounded-lg border border-dashed border-border">
+                  <ClipboardCheck className="h-8 w-8 opacity-30" />
+                  <p className="text-sm">Aucun produit dans cet entrepôt.</p>
+                </div>
+              ) : (
+                <div className="mt-4 overflow-hidden rounded-lg border border-border">
+                  <table className="min-w-full divide-y divide-border">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Nom
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Quantité
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Date d'expiration
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      {products.map((product, index) => {
+                        const isExpired =
+                          product.expiration_date <
+                          new Date().toISOString().split('T')[0];
+                        return (
+                          <tr
+                            key={product.id ?? index}
+                            className="transition-colors hover:bg-muted/30"
+                          >
+                            <td className="px-4 py-3 text-sm font-medium text-foreground">
+                              {product.name}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                              {product.quantity}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <span
+                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${
+                                  isExpired
+                                    ? 'bg-red-50 text-red-700'
+                                    : 'bg-emerald-50 text-emerald-700'
+                                }`}
+                              >
+                                {product.expiration_date}
+                                {isExpired ? ' · Périmé' : ''}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
     </div>
   );
 };

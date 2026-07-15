@@ -13,6 +13,7 @@ export const useWarehouse = create(
   persist(
     (set) => ({
       warehouses: [],
+
       warehouse: null,
       loading: false,
       error: null,
@@ -85,7 +86,7 @@ export const useWarehouse = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to create warehouse',
           }));
-          return false;
+          throw error;
         }
       },
 
@@ -112,7 +113,7 @@ export const useWarehouse = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to update warehouse',
           }));
-          return false;
+          throw error;
         }
       },
 
@@ -136,7 +137,7 @@ export const useWarehouse = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to delete warehouse',
           });
-          return false;
+          throw error;
         }
       },
 
@@ -162,7 +163,7 @@ export const useWarehouse = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to audit warehouse',
           }));
-          return false;
+          throw error;
         }
       },
     }),

@@ -86,7 +86,7 @@ export const useProductStore = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to create product',
           }));
-          return false;
+          throw error;
         }
       },
 
@@ -112,7 +112,7 @@ export const useProductStore = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to update product',
           });
-          return false;
+          throw error;
         }
       },
 
@@ -137,7 +137,7 @@ export const useProductStore = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to delete product',
           });
-          return false;
+          throw error;
         }
       },
 
@@ -164,7 +164,7 @@ export const useProductStore = create(
             loading: false,
             error: error.response?.data?.detail || 'Failed to move product',
           });
-          return false;
+          throw error;
         }
       },
     }),

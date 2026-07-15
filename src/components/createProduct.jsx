@@ -23,6 +23,16 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { useProductStore } from '@/stores/product.store';
 import { Calendar } from './ui/calendar';
 import { PRODUCT_STATUS } from '@/constants/enumProduct';
+import { getErrorMessage } from '@/utils/errors';
+
+const isPastDate = (dateStr) => {
+  if (!dateStr) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkDate = new Date(dateStr);
+  checkDate.setHours(0, 0, 0, 0);
+  return checkDate < today;
+};
 
 export function CreateProduct() {
   const isMobile = useIsMobile();
@@ -54,7 +64,7 @@ export function CreateProduct() {
       }
     } catch (error) {
       console.log(error);
-      toast.error('Erreur lors de la création du produit');
+      toast.error(getErrorMessage(error, 'Erreur lors de la création du produit'));
     }
   };
 
@@ -69,11 +79,22 @@ export function CreateProduct() {
     if (!selectedDate) return;
 
     setDate(selectedDate);
+    const formatted = formatDate(selectedDate);
+    const expired = isPastDate(formatted);
 
-    setFormData((prev) => ({
-      ...prev,
-      expiration_date: formatDate(selectedDate),
-    }));
+    setFormData((prev) => {
+      let newStatus = prev.status;
+      if (expired) {
+        newStatus = 'perime';
+      } else if (prev.status === 'perime') {
+        newStatus = '';
+      }
+      return {
+        ...prev,
+        expiration_date: formatted,
+        status: newStatus,
+      };
+    });
   };
 
   const swipeDirection = isMobile ? 'down' : 'right';
@@ -206,11 +227,22 @@ export function CreateProduct() {
               }}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
             >
-              {PRODUCT_STATUS.map((status) => (
-                <option value={status.label} key={status.value}>
-                  {status.label}
-                </option>
-              ))}
+              <option value="">Sélectionner un statut</option>
+              {PRODUCT_STATUS.map((status) => {
+                const expired = isPastDate(formData.expiration_date);
+                const isDisabled = expired
+                  ? status.label !== 'perime'
+                  : status.label === 'perime';
+                return (
+                  <option
+                    value={status.label}
+                    key={status.value}
+                    disabled={isDisabled}
+                  >
+                    {status.label}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
