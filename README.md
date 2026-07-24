@@ -1,464 +1,272 @@
-# EcoStock Frontend
+# 📦 EcoStock - Guide d'Installation & d'Exécution Complet (Full Stack)
 
-Ce projet est l’interface web d’EcoStock, une application de gestion d’inventaire destinée à suivre les entrepôts, les produits, leurs statuts et leurs déplacements. Il a été construit avec React, Vite, Zustand, React Router, Tailwind CSS et plusieurs composants UI basés sur shadcn/ui.
-
-Ce document sert de guide pratique pour une personne non développeuse qui veut comprendre, installer, faire tourner, ou faire évoluer l’application.
+Ce document est le **README unifié** de la solution **EcoStock**. Il explique comment installer, configurer et exécuter l'application complète, regroupant l'API Backend (Django REST Framework) et l'application Web Frontend (React + Vite).
 
 ---
 
-## 1. Objectif du projet
+## 📋 Table des matières
 
-EcoStock permet de :
-
-- consulter la liste des entrepôts,
-- créer, modifier ou supprimer des produits,
-- déplacer un produit d’un entrepôt à un autre,
-- consulter les détails d’un entrepôt,
-- lancer un audit d’un entrepôt,
-- gérer la connexion de l’utilisateur.
-
-L’application communique avec un backend via des requêtes HTTP réalisées avec Axios.
-
----
-
-## 2. Prérequis
-
-Avant de lancer le projet, il faut disposer de :
-
-- Node.js installé sur la machine,
-- pnpm installé,
-- un backend fonctionnel exposant les routes attendues par l’interface.
-
-Les points d’entrée API attendus sont notamment :
-
-- authentification : `token/` et `token/refresh`
-- produits : `products/`
-- entrepôts : `warehouses/`
+1. [Présentation du projet](#1-présentation-du-projet)
+2. [Architecture Technologique](#2-architecture-technologique)
+3. [Prérequis Systèmes](#3-prérequis-systèmes)
+4. [Guide d'Installation et Lancement Pas à Pas](#4-guide-dinstallation-et-lancement-pas-à-pas)
+   - [Étape 1 : Démarrer le Backend (API Django)](#étape-1--démarrer-le-backend-api-django)
+   - [Étape 2 : Démarrer le Frontend (React + Vite)](#étape-2--démarrer-le-frontend-react--vite)
+5. [Aperçu Rapide des Commandes (Cheatsheet)](#5-aperçu-rapide-des-commandes-cheatsheet)
+6. [Variables d'Environnement](#6-variables-denvironnement)
+7. [Fonctionnalités & Endpoints API](#7-fonctionnalités--endpoints-api)
+8. [Workflow Métier (Transfert de Produits)](#8-workflow-métier-transfert-de-produits)
+9. [Structure des Projets](#9-structure-des-projets)
+10. [Dépannage & Erreurs Courantes (Troubleshooting)](#10-dépannage--erreurs-courantes-troubleshooting)
 
 ---
 
-## 3. Installation et lancement
+## 1. Présentation du projet
 
-Depuis la racine du projet, installer les dépendances :
+**EcoStock** est une solution complète de gestion d'inventaire et d'entreposage permettant de :
+- Consulter et gérer la liste des entrepôts (création, modification, suppression, calcul d'audit de capacité).
+- Gérer les stocks de produits (création, quantité, date de péremption, réaffectation).
+- Effectuer des transferts sécurisés de produits d'un entrepôt à un autre avec vérification des règles métier (non-expiration, existence des entrepôts).
+- Authentifier les utilisateurs via des jetons sécurisés **JWT** (JSON Web Tokens).
 
-```bash
-pnpm install
+---
+
+## 2. Architecture Technologique
+
+```mermaid
+flowchart LR
+    subgraph Client ["Client Browser"]
+        ReactApp["React 19 + Vite\n(Zustand, Tailwind CSS, Axios)"]
+    end
+
+    subgraph Backend ["Backend Server (Port 8000)"]
+        DjangoAPI["Django REST Framework\n(SimpleJWT Auth, SQLite/PostgreSQL)"]
+    end
+
+    ReactApp -- "Requêtes HTTP REST (Port 8000)\nHeader: Authorization Bearer <token>" --> DjangoAPI
 ```
 
-Créer ensuite un fichier `.env` à la racine avec la variable suivante :
+- **Backend** : Python 3.10+, Django, Django REST Framework (DRF), `djangorestframework-simplejwt`, Base de données SQLite.
+- **Frontend** : Node.js, React 19, Vite, Zustand (Gestion d'état), React Router v7, Tailwind CSS, Axios, Lucide React, Shadcn UI.
 
+---
+
+## 3. Prérequis Systèmes
+
+Avant de commencer, vérifiez que votre machine dispose des outils suivants :
+
+- **Python** (version 3.10 ou supérieure) : `python --version`
+- **Node.js** (version 18 ou supérieure) & **pnpm** (ou npm) : `node -v` et `pnpm -v`
+- **Git** : pour récupérer les dépôts de code.
+
+---
+
+## 4. Guide d'Installation et Lancement Pas à Pas
+
+Pour faire tourner l'application complète, vous devez exécuter le **Backend** et le **Frontend** simultanément dans deux fenêtres de terminal distinctes.
+
+---
+
+### Étape 1 : Démarrer le Backend (API Django)
+
+1. **Naviguez vers le dossier du backend** :
+   ```bash
+   cd path/to/ecoStock
+   ```
+
+2. **Créer et activer un environnement virtuel Python** :
+   - *Sur Windows (PowerShell)* :
+     ```powershell
+     python -m venv .venv
+     .\.venv\Scripts\Activate.ps1
+     ```
+   - *Sur Linux / macOS* :
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
+
+3. **Installer les dépendances requises** :
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *(Si `requirements.txt` n'est pas présent, installez : `pip install django djangorestframework djangorestframework-simplejwt django-cors-headers`)*
+
+4. **Appliquer les migrations de base de données** :
+   ```bash
+   python manage.py migrate
+   ```
+
+5. **Créer un compte administrateur (Superuser)** pour vous connecter :
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+6. **(Optionnel) Alimenter la base avec des données de test** :
+   ```bash
+   python manage.py shell
+   ```
+   Puis dans le shell Python :
+   ```python
+   from warehouse.models import WareHouse
+   from produits.models import Product
+   from django.utils import timezone
+
+   w1 = WareHouse.objects.create(name="Entrepôt Central", location="Dakar", capacity=500)
+   w2 = WareHouse.objects.create(name="Entrepôt Annexe", location="Thies", capacity=200)
+
+   Product.objects.create(name="Jus d'Orange 1L", quantity=100, expiration_date=timezone.now().date(), warehouse=w1)
+   exit()
+   ```
+
+7. **Lancer le serveur de développement Django** :
+   ```bash
+   python manage.py runserver 8000
+   ```
+   L'API est désormais accessible sur : **`http://127.0.0.1:8000/`**
+
+---
+
+### Étape 2 : Démarrer le Frontend (React + Vite)
+
+1. **Ouvrez un second terminal** et naviguez vers le dossier du frontend :
+   ```bash
+   cd path/to/ecostock-frontend
+   ```
+
+2. **Installer les dépendances Node.js** :
+   ```bash
+   pnpm install
+   # ou si vous utilisez npm : npm install
+   ```
+
+3. **Configurer les variables d'environnement** :
+   Créer un fichier `.env` à la racine de `ecostock-frontend` contenant :
+   ```env
+   VITE_API_URL=http://127.0.0.1:8000/api
+   ```
+
+4. **Lancer l'application Frontend** :
+   ```bash
+   pnpm dev
+   # ou avec npm : npm run dev
+   ```
+
+5. **Accéder à l'application Web** :
+   Ouvrez votre navigateur sur l'adresse indiquée par Vite (généralement **`http://localhost:5173/`**).
+
+---
+
+## 5. Aperçu Rapide des Commandes (Cheatsheet)
+
+| Composant | Dossier | Commande d'activation | Commande d'exécution | URL par défaut |
+| :--- | :--- | :--- | :--- | :--- |
+| **Backend** | `ecoStock/` | `.\.venv\Scripts\Activate.ps1` | `python manage.py runserver 8000` | `http://127.0.0.1:8000/` |
+| **Frontend** | `ecostock-frontend/` | N/A | `pnpm dev` | `http://localhost:5173/` |
+
+---
+
+## 6. Variables d'Environnement
+
+### Frontend (`ecostock-frontend/.env`)
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://127.0.0.1:8000/api
 ```
-
-Remplacer l’URL par celle de votre backend.
-
-Lancer l’application en mode développement :
-
-```bash
-pnpm dev
-```
-
-L’URL fournie par Vite sera généralement de type `http://localhost:5173`.
+*(Remarque : Ajustez l'URL selon le préfixe configuré dans votre routeur Django Backend, ex: `http://127.0.0.1:8000/api` ou `http://127.0.0.1:8000/api/v1`)*
 
 ---
 
-## 4. Structure du projet
+## 7. Fonctionnalités & Endpoints API
 
-Voici la logique générale du dépôt :
+### 🔐 Authentification (JWT)
+- `POST /api/v1/token/` : Obtenir un jeton d'accès (`access`) et de rafraîchissement (`refresh`).
+- `POST /api/v1/token/refresh/` : Obtenir un nouveau jeton d'accès.
 
-- `src/` : code source principal de l’application,
-- `public/` : fichiers statiques et icônes,
-- `src/apis/` : appels HTTP vers l’API,
-- `src/stores/` : gestion d’état globale avec Zustand,
-- `src/pages/` : écrans principaux,
-- `src/components/` : composants UI et formulaires,
-- `src/utils/` : utilitaires comme Axios et gestion des erreurs,
-- `src/validations/` : validation des formulaires,
-- `src/constants/` : constantes partagées,
-- `src/hooks/` : hooks personnalisés.
+### 📦 Produits (`/api/v1/products/`)
+- `GET /api/v1/products/` : Lister l'ensemble des produits.
+- `POST /api/v1/products/` : Ajouter un nouveau produit.
+- `GET /api/v1/products/{id}/` : Consulter les détails d'un produit.
+- `PUT / PATCH /api/v1/products/{id}/` : Modifier un produit.
+- `DELETE /api/v1/products/{id}/` : Supprimer un produit.
+- `POST /api/v1/products/{id}/move/` : Déplacer un produit vers un autre entrepôt.
 
----
-
-## 5. Point d’entrée et architecture générale
-
-### 5.1 Point d’entrée
-
-Le fichier principal est `src/main.jsx`.
-
-Il réalise trois actions essentielles :
-
-- créer l’application React,
-- configurer le routage avec `react-router-dom`,
-- afficher la bonne page selon l’URL.
-
-### 5.2 Mise en page globale
-
-Le fichier `src/layout.jsx` sert de structure générale de l’interface.
-
-Il contient :
-
-- la barre latérale de navigation,
-- l’en-tête de l’application,
-- la zone où le contenu des pages s’affiche via `Outlet`.
-
-Cette architecture permet d’avoir une structure commune à toutes les pages.
+### 🏢 Entrepôts (`/api/v1/warehouse/`)
+- `GET /api/v1/warehouse/` : Lister les entrepôts.
+- `POST /api/v1/warehouse/` : Créer un entrepôt.
+- `GET /api/v1/warehouse/{id}/` : Détails d'un entrepôt.
+- `PUT / PATCH /api/v1/warehouse/{id}/` : Mettre à jour un entrepôt.
+- `DELETE /api/v1/warehouse/{id}/` : Supprimer un entrepôt.
+- `GET /api/v1/warehouse/{id}/audit/` : Effectuer un audit de l'entrepôt.
 
 ---
 
-## 6. Routage de l’application
-
-Les routes principales sont définies dans `src/main.jsx` :
-
-- `/` : tableau de bord,
-- `/warehouse` : liste des entrepôts,
-- `/products` : liste des produits,
-- `/warehouse/:id` : détail d’un entrepôt,
-- `/product/:id` : détail d’un produit,
-- `/login` : page de connexion.
-
-Chaque route correspond à une page ou un composant spécifique.
-
----
-
-## 7. Gestion d’état avec Zustand
-
-Le projet utilise Zustand pour gérer les données partagées et éviter de faire passer des props partout dans l’application.
-
-### 7.1 Store d’authentification : `src/stores/auth.store.js`
-
-Le store `useAuthStore` gère :
-
-- `token` : token d’accès,
-- `refreshToken` : token de rafraîchissement,
-- `isAuthenticated` : état de connexion,
-- `loading` : état de chargement,
-- `error` : message d’erreur.
-
-Actions disponibles :
-
-- `login(credentials)` : envoie les identifiants à l’API et met à jour le store si la connexion réussit,
-- `refreshAccessToken()` : tente d’obtenir un nouveau token à partir du refresh token.
-
-Le store est persistant grâce à `persist` et `createJSONStorage(() => localStorage)`, ce qui permet de conserver l’état de connexion dans le navigateur.
-
-### 7.2 Store des produits : `src/stores/product.store.js`
-
-Le store `useProductStore` gère les produits dans toute l’application.
-
-Il contient :
-
-- `products` : liste des produits,
-- `product` : produit actuellement sélectionné,
-- `loading` et `error`.
-
-Actions disponibles :
-
-- `fetchAllProducts()` : charger tous les produits,
-- `fetchProduct(id)` : charger un produit par ID,
-- `productCreate(data)` : créer un produit,
-- `productUpdate(id, data)` : modifier un produit,
-- `productDelete(id)` : supprimer un produit,
-- `productMove(id, data)` : déplacer un produit vers un autre entrepôt.
-
-### 7.3 Store des entrepôts : `src/stores/warehouse.store.js`
-
-Le store `useWarehouse` gère la logique liée aux entrepôts.
-
-Il contient :
-
-- `warehouses` : liste des entrepôts,
-- `warehouse` : entrepôt actuellement sélectionné,
-- `loading` et `error`.
-
-Actions disponibles :
-
-- `fetchAllWarehouses()` : charger les entrepôts,
-- `fetchWarehouse(id)` : charger un entrepôt précis,
-- `warehouseCreate(data)` : créer un entrepôt,
-- `warehouseUpdate(id, data)` : modifier un entrepôt,
-- `warehouseDelete(id)` : supprimer un entrepôt,
-- `warehouseAudit(id)` : lancer un audit sur un entrepôt.
-
----
-
-## 8. Configuration Axios et interceptor
-
-Le cœur du réseau est défini dans `src/utils/axios.js`.
-
-### 8.1 Instance Axios
-
-Le fichier crée une instance Axios avec :
-
-- `baseURL` venant de `import.meta.env.VITE_API_URL`,
-- un header `Content-Type: application/json` par défaut.
-
-Toutes les requêtes du front passent par cette instance.
-
-### 8.2 Interceptor de requête
-
-L’interceptor ajoute automatiquement le header `Authorization: Bearer ...` pour chaque requête, à condition qu’un token soit présent dans le stockage local.
-
-Cela permet de :
-
-- ne pas répéter le token sur chaque appel,
-- centraliser l’ajout d’authentification,
-- simplifier l’intégration avec le backend.
-
-En cas d’erreur pendant l’injection du header, une erreur est loggée dans la console.
-
----
-
-## 9. Modules API
-
-Les modules dans `src/apis/` servent de pont entre les stores et le backend.
-
-### 9.1 Authentification : `src/apis/auth.api.js`
-
-Fonctions principales :
-
-- `login(credentials)` : appelle `token/` pour se connecter,
-- `refreshToken(refresh)` : appelle `token/refresh` pour rafraîchir le token.
-
-### 9.2 Produits : `src/apis/products.api.js`
-
-Fonctions principales :
-
-- `getAllProducts()` : récupérer tous les produits,
-- `getProduct(id)` : récupérer un produit par ID,
-- `createProduct(productData)` : créer un produit,
-- `updateProduct(id, productData)` : modifier un produit,
-- `deleteProduct(id)` : supprimer un produit,
-- `moveProduct(id, data)` : déplacer un produit.
-
-### 9.3 Entrepôts : `src/apis/warehouse.api.js`
-
-Fonctions principales :
-
-- `warehouses()` : récupérer tous les entrepôts,
-- `warehouse(id)` : récupérer un entrepôt précis,
-- `createWarehouse(data)` : créer un entrepôt,
-- `updateWarehouse(data, id)` : modifier un entrepôt,
-- `deleteWarehouse(id)` : supprimer un entrepôt,
-- `auditWarehouse(id)` : obtenir un audit sur un entrepôt.
-
----
-
-## 10. Pages principales
-
-### 10.1 Page de connexion : `src/pages/Login.jsx`
-
-Cette page permet à l’utilisateur de se connecter.
-
-Elle utilise :
-
-- `react-hook-form` pour gérer le formulaire,
-- `zod` pour la validation des champs,
-- `useAuthStore` pour appeler la logique d’authentification.
-
-### 10.2 Tableau de bord : `src/App.jsx`
-
-La page d’accueil affiche des statistiques globales :
-
-- nombre d’entrepôts,
-- nombre de produits,
-- capacité maximale parmi les entrepôts,
-- quantité totale en stock.
-
-Elle charge aussi les données si l’utilisateur est connecté.
-
-### 10.3 Page des entrepôts : `src/pages/warehouse.jsx`
-
-Affiche la liste des entrepôts sous forme de cartes. Lorsque l’utilisateur clique sur une carte, il arrive sur la page détail de l’entrepôt.
-
-### 10.4 Page des produits : `src/pages/product.jsx`
-
-Affiche les produits sous forme de tableau avec :
-
-- nom,
-- quantité,
-- date d’expiration,
-- entrepôt associé,
-- statut,
-- actions de vue, modification et suppression.
-
-### 10.5 Détail d’un produit : `src/components/product/productDetail.jsx`
-
-Cette vue permet de :
-
-- consulter les informations du produit,
-- le déplacer vers un autre entrepôt,
-- afficher des notifications de succès ou d’erreur.
-
-### 10.6 Détail d’un entrepôt : `src/components/warehouse/detailWarehouse.jsx`
-
-Affiche les informations générales d’un entrepôt et permet de lancer un audit.
-
----
-
-## 11. Composants d’interaction et formulaires
-
-Le projet utilise beaucoup de composants “drawer” pour créer ou modifier des entités, ce qui donne une expérience fluide sur mobile et sur ordinateur.
-
-### 11.1 Création d’un entrepôt
-
-Le composant `src/components/warehouse/createWarehouse.jsx` permet de :
-
-- saisir le nom de l’entrepôt,
-- saisir l’emplacement,
-- saisir la capacité,
-- envoyer ces données au backend.
-
-### 11.2 Création d’un produit
-
-Le composant `src/components/createProduct.jsx` permet de :
-
-- saisir le nom du produit,
-- saisir sa quantité,
-- choisir une date d’expiration,
-- choisir l’entrepôt associé,
-- choisir un statut.
-
-### 11.3 Modification d’un produit
-
-Le composant `src/components/product/UpdateProductModal.jsx` permet de modifier un produit existant avec un formulaire dédié.
-
-Il envoie uniquement les champs réellement modifiés afin d’éviter de provoquer des erreurs côté API.
-
----
-
-## 12. Validation des formulaires
-
-La validation des formulaires est faite avec `zod` dans `src/validations/form.validate.js`.
-
-Le schéma actuellement utilisé concerne la page de connexion et vérifie que :
-
-- `username` contient au moins 3 caractères,
-- `password` contient au moins 3 caractères.
-
-Cette étape évite d’envoyer des données trop courtes au backend.
-
----
-
-## 13. Interface utilisateur et style
-
-Le front utilise :
-
-- Tailwind CSS pour le style,
-- shadcn/ui pour les composants UI de base,
-- `lucide-react` pour les icônes,
-- `sonner` pour les notifications toast.
-
-Le design est orienté “dashboard moderne”, avec une sidebar latérale et des cartes d’information.
-
----
-
-## 14. Constantes et réglages partagés
-
-### 14.1 Statuts de produit : `src/constants/enumProduct.js`
-
-Ce fichier contient les statuts possibles d’un produit :
-
-- `disponible`
-- `reserve`
-- `perime`
-
-### 14.2 Liens du menu : `src/constants/navLinks.js`
-
-Ce fichier contient les liens affichés dans la sidebar avec leurs icônes et chemins associés.
-
----
-
-## 15. Gestion des erreurs
-
-Le projet fournit un utilitaire dans `src/utils/errors.js` pour transformer les réponses d’erreur backend en messages lisibles pour l’utilisateur.
-
-Il accepte plusieurs formats, par exemple :
-
-- une simple chaîne de texte,
-- un objet contenant `detail`,
-- des erreurs de validation en cascade.
-
-Cette logique est utilisée dans les composants pour afficher des notifications claires.
-
----
-
-## 16. Déroulé typique d’une action utilisateur
-
-### 16.1 Se connecter
-
-1. L’utilisateur remplit le formulaire de connexion.
-2. Le composant `Login` appelle la méthode `login()` du store d’authentification.
-3. Le store appelle l’API de connexion.
-4. Si tout est correct, le token est sauvegardé et l’interface passe en mode connecté.
-
-### 16.2 Créer un produit
-
-1. L’utilisateur ouvre le formulaire de création.
-2. Le composant envoie les données au store `productCreate()`.
-3. Le store appelle la fonction API correspondante.
-4. Le backend répond avec le produit créé.
-5. Le store met à jour la liste locale et une notification confirme la réussite.
-
-### 16.3 Déplacer un produit
-
-1. L’utilisateur ouvre la page de détail d’un produit.
-2. Il choisit un nouvel entrepôt dans la liste.
-3. Le composant appelle `productMove()`.
-4. Le backend reçoit la demande de déplacement.
-5. La page est rechargée avec les informations mises à jour.
-
----
-
-## 17. Bonnes pratiques pour faire évoluer le projet
-
-Pour ajouter une nouvelle fonctionnalité, le chemin conseillé est le suivant :
-
-1. ajouter la fonction d’appel API dans `src/apis/`,
-2. ajouter l’action correspondante dans le store dans `src/stores/`,
-3. créer ou modifier un composant dans `src/components/` ou une page dans `src/pages/`,
-4. ajouter la route dans `src/main.jsx` si nécessaire,
-5. vérifier la cohérence avec le tableau de bord ou les écrans concernés.
-
----
-
-## 18. Points de vigilance
-
-Avant de faire tourner ou modifier le projet, vérifier les éléments suivants :
-
-- la variable `VITE_API_URL` est bien définie,
-- le backend expose bien les endpoints attendus,
-- le token est bien envoyé via l’interceptor Axios,
-- les stores se mettent à jour correctement après une action utilisateur,
-- les données sont persistées correctement si l’on recharge la page.
-
----
-
-## 19. Commandes utiles
-
-```bash
-pnpm install
-pnpm dev
-pnpm build
-pnpm lint
+## 8. Workflow Métier (Transfert de Produits)
+
+Lorsqu'un utilisateur initie un transfert de produit depuis l'interface ou l'API, les validations suivantes sont exécutées côté Backend :
+
+```mermaid
+flowchart TD
+    A[Requête POST /products/{id}/move/] --> B{Le produit existe-t-il ?}
+    B -- Non --> C[Erreur 400 - Produit introuvable]
+    B -- Oui --> D{Champ 'warehouse' présent ?}
+    D -- Non --> E[Erreur 400 - Champ obligatoire]
+    D -- Oui --> F{L'entrepôt cible existe-t-il ?}
+    F -- Non --> G[Erreur 400 - Entrepôt introuvable]
+    F -- Oui --> H{Date d'expiration valide ?}
+    H -- Expirée --> I[Erreur 400 - Déplacement refusé]
+    H -- Valide --> J[Mettre à jour l'entrepôt du produit]
+    J --> K[Succès 200 - Produit déplacé]
 ```
 
 ---
 
-## 20. Résumé rapide
+## 9. Structure des Projets
 
-En résumé, ce frontend :
+```text
+.
+├── ecoStock/                      # Dépôt Backend (Django)
+│   ├── config/                    # Configuration du projet Django (settings, urls)
+│   ├── produits/                  # Application Django de gestion des produits
+│   ├── warehouse/                 # Application Django de gestion des entrepôts
+│   ├── db.sqlite3                 # Base de données SQLite locale
+│   ├── manage.py                  # Script de gestion Django
+│   └── requirements.txt           # Dépendances Python
+│
+└── ecostock-frontend/             # Dépôt Frontend (React + Vite)
+    ├── public/                    # Assets statiques
+    ├── src/
+    │   ├── apis/                  # Requêtes Axios vers le Backend
+    │   ├── components/            # Composants UI réutilisables (shadcn/ui)
+    │   ├── pages/                 # Écrans de l'application (Dashboard, Products, Warehouses)
+    │   ├── stores/                # States Zustand (Auth, Products, Warehouses)
+    │   ├── utils/                 # Intercepteur Axios & Helpers
+    │   ├── main.jsx               # Point d'entrée & Routage React Router
+    │   └── layout.jsx             # Shell & Layout principal
+    ├── .env                       # Configuration de l'URL API
+    ├── package.json               # Dépendances et scripts Node.js
+    └── vite.config.js             # Configuration du bundler Vite
+```
 
-- affiche une interface d’inventaire moderne,
-- communique avec une API backend via Axios,
-- utilise Zustand pour la logique de données,
-- stocke l’authentification localement,
-- gère les entrepôts et les produits depuis une interface claire et simple.
+---
 
-Le meilleur moyen de comprendre le projet est de suivre cet ordre :
+## 10. Dépannage & Erreurs Courantes (Troubleshooting)
 
-1. comprendre la structure des dossiers,
-2. lire la configuration Axios,
-3. comprendre les stores,
-4. suivre le flux d’une action utilisateur depuis la page jusqu’à l’API.
+### 1. Erreur CORS (`Cross-Origin Request Blocked`)
+- **Symptôme** : Les requêtes HTTP échouent depuis le navigateur avec un message CORS dans la console.
+- **Solution** : Vérifiez que `django-cors-headers` est installé côté Django et que `CORS_ALLOW_ALL_ORIGINS = True` (ou l'origine `http://localhost:5173`) est ajouté dans `config/settings.py`.
 
+### 2. Erreur `401 Unauthorized` lors des requêtes
+- **Symptôme** : Impossible de récupérer les produits ou entrepôts.
+- **Solution** : Connectez-vous via l'écran `/login` avec vos identifiants d'utilisateur Django superuser créés précédemment (`python manage.py createsuperuser`).
+
+### 3. PowerShell bloque l'activation du VENV
+- **Symptôme** : `cannot be loaded because running scripts is disabled on this system`.
+- **Solution** : Lancez la commande suivante dans PowerShell en administrateur :
+  ```powershell
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
+
+---
+
+### 💡 Besoin d'assistance ?
+Consultez les fichiers de configuration ou ouvrez un ticket dans l'un des deux dépôts du projet.
